@@ -1,0 +1,107 @@
+{
+  "channel": "kyc-session",
+  "n_total": 1973,
+  "n_fraud": 327,
+  "operating_point": 0.33218305111979934,
+  "prauc_combined": {
+    "mean": 0.4072939104630794,
+    "ci_lo": 0.3209071229067906,
+    "ci_hi": 0.49335933794093456
+  },
+  "prauc_supervised": 0.45170646896095773,
+  "roc_auc_combined": 0.5790395846852693,
+  "roc_auc_supervised": 0.7168072680077872,
+  "confusion_matrix": {
+    "tp": 13,
+    "fp": 3,
+    "tn": 227,
+    "fn": 54,
+    "precision": 0.8125,
+    "recall": 0.194,
+    "f1": 0.3133,
+    "false_positive_rate": 0.013,
+    "specificity": 0.987
+  },
+  "per_vector_recall": [
+    {
+      "vector_id": "V003",
+      "n_fraud_actors": 7,
+      "clf_recall": 1.0,
+      "combined_recall": 1.0,
+      "clf_precision": 1.0,
+      "combined_precision": 0.7,
+      "clf_f1": 1.0,
+      "combined_f1": 0.824,
+      "zero_day": false
+    },
+    {
+      "vector_id": "V011",
+      "n_fraud_actors": 11,
+      "clf_recall": 0.0,
+      "combined_recall": 0.0,
+      "clf_precision": 0.0,
+      "combined_precision": 0.0,
+      "clf_f1": 0.0,
+      "combined_f1": 0.0,
+      "zero_day": true
+    },
+    {
+      "vector_id": "V013",
+      "n_fraud_actors": 5,
+      "clf_recall": 0.0,
+      "combined_recall": 0.2,
+      "clf_precision": 0.0,
+      "combined_precision": 0.25,
+      "clf_f1": 0.0,
+      "combined_f1": 0.222,
+      "zero_day": true
+    },
+    {
+      "vector_id": "V027",
+      "n_fraud_actors": 5,
+      "clf_recall": 1.0,
+      "combined_recall": 1.0,
+      "clf_precision": 1.0,
+      "combined_precision": 0.625,
+      "clf_f1": 1.0,
+      "combined_f1": 0.769,
+      "zero_day": false
+    }
+  ],
+  "ood_story": [
+    {
+      "vector_id": "V013",
+      "n_fraud_actors": 5,
+      "supervised_recall": 0.0,
+      "combined_recall": 0.2,
+      "ood_delta": 0.2,
+      "category": "zero_day"
+    },
+    {
+      "vector_id": "V011",
+      "n_fraud_actors": 11,
+      "supervised_recall": 0.0,
+      "combined_recall": 0.0,
+      "ood_delta": 0.0,
+      "category": "zero_day"
+    }
+  ],
+  "expected_loss": {
+    "approved_fraud_events": 54,
+    "total_fraud_events": 67,
+    "loss_inr": 1472314.99,
+    "loss_usd": 17527.56
+  },
+  "friction_cost": {
+    "legit_events_blocked": 3,
+    "total_legit_events": 230,
+    "friction_inr": 0.0,
+    "friction_usd": 0.0
+  },
+  "policy_distribution": {
+    "APPROVE": 237,
+    "STEP_UP": 29,
+    "DECLINE": 16,
+    "HOLD": 15
+  }
+}

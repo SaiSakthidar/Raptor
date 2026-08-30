@@ -1,0 +1,79 @@
+{
+  "channel": "agent-payment",
+  "n_total": 4059,
+  "n_fraud": 180,
+  "operating_point": 0.31316862480034724,
+  "prauc_combined": {
+    "mean": 1.0,
+    "ci_lo": 0.9999999999999998,
+    "ci_hi": 1.0
+  },
+  "prauc_supervised": 1.0,
+  "roc_auc_combined": 1.0,
+  "roc_auc_supervised": 1.0,
+  "confusion_matrix": {
+    "tp": 34,
+    "fp": 4,
+    "tn": 572,
+    "fn": 0,
+    "precision": 0.8947,
+    "recall": 1.0,
+    "f1": 0.9444,
+    "false_positive_rate": 0.0069,
+    "specificity": 0.9931
+  },
+  "per_vector_recall": [
+    {
+      "vector_id": "V004",
+      "n_fraud_actors": 10,
+      "clf_recall": 1.0,
+      "combined_recall": 1.0,
+      "clf_precision": 1.0,
+      "combined_precision": 0.714,
+      "clf_f1": 1.0,
+      "combined_f1": 0.833,
+      "zero_day": false
+    },
+    {
+      "vector_id": "V023",
+      "n_fraud_actors": 15,
+      "clf_recall": 1.0,
+      "combined_recall": 1.0,
+      "clf_precision": 1.0,
+      "combined_precision": 0.789,
+      "clf_f1": 1.0,
+      "combined_f1": 0.882,
+      "zero_day": false
+    },
+    {
+      "vector_id": "V026",
+      "n_fraud_actors": 7,
+      "clf_recall": 1.0,
+      "combined_recall": 1.0,
+      "clf_precision": 1.0,
+      "combined_precision": 0.636,
+      "clf_f1": 1.0,
+      "combined_f1": 0.778,
+      "zero_day": false
+    }
+  ],
+  "ood_story": [],
+  "expected_loss": {
+    "approved_fraud_events": 0,
+    "total_fraud_events": 34,
+    "loss_inr": 0.0,
+    "loss_usd": 0.0
+  },
+  "friction_cost": {
+    "legit_events_blocked": 4,
+    "total_legit_events": 576,
+    "friction_inr": 46767.67,
+    "friction_usd": 556.76
+  },
+  "policy_distribution": {
+    "APPROVE": 514,
+    "STEP_UP": 46,
+    "DECLINE": 38,
+    "HOLD": 12
+  }
+}
