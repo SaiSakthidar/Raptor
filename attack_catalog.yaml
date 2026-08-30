@@ -1,0 +1,576 @@
+##############################################################################
+# Mastercard Innovation Challenge 2026
+# Attack Vector Registry — single source of truth for red generators,
+# blue stack adapters, and the eval harness.
+#
+# Fields per vector:
+#   vector_id       : unique stable ID
+#   name            : short human name
+#   modality        : primary detection signal domain
+#                     TXN | AGENT | KYC | BENEFICIARY | CONTEXT |
+#                     PROCEDURAL | MEDIA | MODEL
+#   channel         : adapter type  (txn-sequence | agent-payment |
+#                     kyc-session | chat-call)
+#   observed_by     : who on the payment rail can see this
+#                     issuer | acquirer | network | consortium | receiving-bank
+#   expected_signal : what joint feature pattern the detector keys on
+#   generator_params: knobs the red generator exposes
+##############################################################################
+
+vectors:
+
+  - vector_id: V001
+    name: "Structuring / Threshold Evasion"
+    modality: TXN
+    channel: txn-sequence
+    observed_by: [issuer, network]
+    description: >
+      Splitting a large payment into multiple transactions each just under an
+      automated-review threshold, fired in rapid succession from the same device
+      at the same merchant category.
+    expected_signal: >
+      High txn_count_last_1hr + high same_mcc_count + each amount 80-99% of
+      threshold; no single transaction looks bad in isolation.
+    generator_params:
+      threshold: 50000
+      n_burst_range: [4, 7]
+      amount_pct_range: [0.80, 0.99]
+      burst_window_minutes: 90
+      n_legit: 200
+      n_fraud: 40
+
+  - vector_id: V002
+    name: "Deepfake BEC / APP Fraud"
+    modality: BENEFICIARY
+    channel: txn-sequence
+    observed_by: [issuer, receiving-bank, network]
+    description: >
+      Employee authorizes a large wire after a deepfake video/audio call
+      impersonating an executive. The payment itself is legitimate
+      (real employee, real credentials) — signal lives in beneficiary novelty
+      and request-context urgency markers.
+    expected_signal: >
+      Large single authorized transfer to a brand-new beneficiary
+      (beneficiary_tenure_days ≈ 0), preceded by an out-of-band communication
+      event, high urgency_score, amount >> 30-day historical max.
+    generator_params:
+      n_legit: 200
+      n_fraud: 40
+      fraud_amount_range: [500000, 5000000]
+      legit_max_amount: 300000
+      new_beneficiary_pct: 0.95
+
+  - vector_id: V003
+    name: "Synthetic Identity KYC Bypass"
+    modality: KYC
+    channel: kyc-session
+    observed_by: [issuer, acquirer]
+    description: >
+      AI-generated identity documents + deepfake liveness video used to open
+      a new account. Fraud account then used for downstream payment fraud.
+    expected_signal: >
+      Low document_age_days (all docs same freshness), liveness_score anomaly,
+      device_is_emulator flag, ip_is_vpn, selfie_consistency_score < threshold.
+    generator_params:
+      n_legit: 200
+      n_fraud: 40
+      emulator_fraud_pct: 0.80
+      vpn_fraud_pct: 0.75
+      liveness_fraud_score_range: [0.3, 0.72]
+
+  - vector_id: V004
+    name: "Agentic Prompt Injection / Payload Poisoning"
+    modality: AGENT
+    channel: agent-payment
+    observed_by: [acquirer, network]
+    description: >
+      Hidden instructions in merchant product listings or metadata manipulate
+      an AI shopping agent's cart mandate — adding unauthorized line items
+      (gift cards, expedited fees) or redirecting the beneficiary.
+    expected_signal: >
+      cart_checkout_delta != 0 (checkout amount exceeds user-approved cart),
+      hidden_line_items > 0, agent_verified = False, merchant_age_days low.
+    generator_params:
+      n_legit: 200
+      n_fraud: 40
+      delta_pct_range: [0.05, 0.30]
+      merchant_age_fraud_range: [1, 30]
+
+  - vector_id: V005
+    name: "Pig-Butchering Investment Scam Funnel"
+    modality: BENEFICIARY
+    channel: txn-sequence
+    observed_by: [issuer, network, consortium]
+    description: >
+      Long-burn romance/investment scam: AI persona cultivates trust over
+      weeks, then convinces victim to transfer escalating amounts to a fake
+      investment platform. Funds immediately exit to mule accounts.
+    expected_signal: >
+      contact_age_days < 60, first_large_outbound_wire, beneficiary is
+      investment-platform category, amount_escalation_ratio > 3×,
+      prior_outbound_wire_count = 0.
+    generator_params:
+      n_legit: 200
+      n_fraud: 40
+      romance_duration_days_range: [14, 90]
+      n_transfer_steps_range: [3, 8]
+      final_amount_range: [50000, 2000000]
+
+  - vector_id: V006
+    name: "LLM-Generated Chargeback / Friendly Fraud"
+    modality: TXN
+    channel: txn-sequence
+    observed_by: [acquirer, issuer]
+    description: >
+      FraudGPT-style mass production of grammatically perfect, emotionally
+      calibrated dispute narratives paired with AI-fabricated evidence images
+      to defeat automated dispute-triage filters.
+    expected_signal: >
+      High dispute_rate_30d, dispute_text_perplexity low (uniform, AI-like),
+      dispute_text_sentence_len_variance low, multiple disputes filed at
+      optimal window (just before merchant review deadline).
+    generator_params:
+      n_legit: 200
+      n_fraud: 40
+      disputes_per_fraud_range: [5, 20]
+      ai_perplexity_range: [10, 35]
+      human_perplexity_range: [55, 150]
+
+  - vector_id: V007
+    name: "AI-Orchestrated BIN Attack / Card Testing"
+    modality: TXN
+    channel: txn-sequence
+    observed_by: [acquirer, network, issuer]
+    description: >
+      LLM-orchestrated agents probe generated card numbers with micro-
+      transactions across many merchants to find live cards, then execute
+      a rapid large-value exploit transaction.
+    expected_signal: >
+      micro_txn_count_1hr > 10, unique_merchant_count_1hr > 8,
+      avg_probe_amount < 50, then single large exploit txn;
+      all merchants are online/MCC=5734.
+    generator_params:
+      n_legit: 200
+      n_fraud: 40
+      probe_count_range: [8, 25]
+      probe_amount_range: [1, 50]
+      exploit_amount_range: [5000, 50000]
+      probe_window_minutes: 45
+
+  - vector_id: V008
+    name: "AI-Recruited Mule Account Network"
+    modality: BENEFICIARY
+    channel: txn-sequence
+    observed_by: [receiving-bank, network, consortium]
+    description: >
+      AI chatbots mass-recruit money mules via job-scam ads. Mule accounts
+      receive stolen funds (fan-in) and immediately forward (fan-out) with
+      minimal dwell time, producing a distinctive pass-through graph pattern.
+    expected_signal: >
+      inbound_sender_count_7d > 5, outbound_recipient_count_7d > 5,
+      avg_dwell_hours < 4, retail_txn_ratio < 0.1 (no normal spending),
+      pass_through_ratio > 0.90.
+    generator_params:
+      n_legit: 200
+      n_fraud: 40
+      fan_in_range: [3, 12]
+      fan_out_range: [2, 8]
+      dwell_hours_range: [0.5, 6]
+
+  - vector_id: V009
+    name: "Adversarial Evasion of Fraud Classifier"
+    modality: MODEL
+    channel: txn-sequence
+    observed_by: [issuer, network]
+    description: >
+      Fraudster has inferred or approximated the fraud model's decision
+      boundary (via probing or model extraction) and crafts transactions
+      that score just below the alert threshold while still executing the
+      fraud. Evades supervised layer; should trigger OOD anomaly detector.
+    expected_signal: >
+      Transactions cluster suspiciously near the model's decision boundary
+      (fraud_score 0.35–0.49 consistently), feature values are unnaturally
+      precise (e.g., txn_count always = 3, amount always = threshold × 0.79).
+    generator_params:
+      n_legit: 200
+      n_fraud: 40
+      target_score_band: [0.35, 0.49]
+      perturbation_std: 0.02
+
+  - vector_id: V010
+    name: "UPI / Fast-Payment Account Takeover"
+    modality: TXN
+    channel: txn-sequence
+    observed_by: [issuer, network]
+    description: >
+      Attacker gains UPI access via smishing + cloned voice OTP extraction,
+      then rapidly drains account via P2P UPI transfers to mule VPAs before
+      victim detects the device change.
+    expected_signal: >
+      device_changed_flag in last 24h, upi_transfers_15min > 3,
+      new_vpa_flag (beneficiary VPA never seen before),
+      transfer_amount >> 30d_avg, all within a narrow 15-min window.
+    generator_params:
+      n_legit: 200
+      n_fraud: 40
+      drain_txn_count_range: [3, 8]
+      drain_window_minutes: 15
+      amount_vs_avg_multiplier_range: [3, 15]
+
+  - vector_id: V011
+    name: "BNPL Synthetic Identity Bust-Out"
+    modality: KYC
+    channel: kyc-session
+    observed_by: [acquirer, issuer]
+    description: >
+      Synthetic identity (AI-fabricated thin-file person) opens BNPL account,
+      immediately maxes installment credit at multiple merchants within days
+      of opening, never makes a repayment. Average synthetic identity active
+      for 18 months before detection.
+    expected_signal: >
+      account_age_days < 14, credit_inquiry_burst > 3 in 7 days,
+      bnpl_merchant_count > 3 in 7 days, prior_txn_count = 0,
+      total_bnpl_amount > credit_limit × 0.95.
+    generator_params:
+      n_legit: 200
+      n_fraud: 40
+      account_age_fraud_range: [1, 14]
+      bnpl_merchants_range: [3, 8]
+      bust_window_days: 7
+
+  - vector_id: V012
+    name: "Digital Arrest / Authority Impersonation Coercion"
+    modality: CONTEXT
+    channel: txn-sequence
+    observed_by: [issuer, network]
+    description: >
+      Fraudsters impersonating law-enforcement/judiciary conduct fake
+      "digital arrest" video calls, coercing victims into immediate large
+      wire transfers under threat of arrest. India MHA: ₹120.3 crore in
+      reported losses. Often from Myanmar/Laos/Cambodia scam compounds.
+    expected_signal: >
+      call_precedes_transfer_minutes < 30, beneficiary_is_new, large
+      single transfer (> 5× 30d max), unusual_hour (late night/early morning),
+      prior_large_transfer_count = 0.
+    generator_params:
+      n_legit: 200
+      n_fraud: 40
+      coercion_amount_range: [500000, 10000000]
+      call_to_transfer_minutes_range: [5, 25]
+
+  - vector_id: V013
+    name: "Voice-Clone IVR / Bank Contact-Center Bypass"
+    modality: MEDIA
+    channel: kyc-session
+    observed_by: [issuer]
+    description: >
+      Cloned voice (3 seconds of audio sufficient) passes bank IVR voice-
+      authentication. Attacker then requests account changes or initiates
+      transfers. BBC journalists demonstrated this against Santander and
+      Halifax voice-ID systems.
+    expected_signal: >
+      voice_auth_confidence anomalously high for a call arriving from an
+      unrecognized number, followed immediately by account_change_flag or
+      large transfer, device_is_known = False.
+    generator_params:
+      n_legit: 200
+      n_fraud: 40
+      post_auth_transfer_pct: 0.85
+      voice_confidence_fraud_range: [0.80, 0.99]
+      voice_confidence_legit_range: [0.60, 0.98]
+
+  - vector_id: V014
+    name: "SIM-Swap → Account Takeover"
+    modality: CONTEXT
+    channel: txn-sequence
+    observed_by: [issuer, network]
+    description: >
+      Attacker clones victim's voice, calls telco support, convinces them to
+      transfer the SIM. Now controls the phone number, intercepts OTPs, resets
+      banking credentials, and drains the account within hours.
+    expected_signal: >
+      sim_swap_preceding_transfer_hours < 24, otp_source_changed=1,
+      device_is_new=1, transfer_amount >> 30d avg, beneficiary_is_new=1.
+    generator_params:
+      n_legit: 200
+      n_fraud: 40
+      swap_to_drain_hours_range: [1, 12]
+      drain_amount_multiplier_range: [5, 20]
+
+  - vector_id: V015
+    name: "LLM Vendor Invoice BEC (text-only)"
+    modality: CONTEXT
+    channel: txn-sequence
+    observed_by: [issuer, acquirer]
+    description: >
+      LLM generates grammatically perfect vendor-invoice redirect emails —
+      no audio/video deepfake. Known vendor relationship, new bank details
+      attached, payment redirected to attacker. Removes the "broken English"
+      tell that historically flagged BEC emails.
+    expected_signal: >
+      vendor_tenure_days high (known relationship), bank_details_changed=1,
+      beneficiary_account_age_days low, amount matches prior invoice pattern,
+      request_via_email_only=1, no phone/video confirmation.
+    generator_params:
+      n_legit: 200
+      n_fraud: 40
+      vendor_tenure_range: [180, 1500]
+      invoice_amount_range: [50000, 2000000]
+
+  - vector_id: V016
+    name: "Real-Estate Closing Wire Fraud"
+    modality: BENEFICIARY
+    channel: txn-sequence
+    observed_by: [issuer, receiving-bank]
+    description: >
+      Attacker clones title attorney/escrow agent voice, calls buyer at closing
+      deadline with updated wire instructions. One-time, large, irreversible.
+      AI-enabled real-estate wire fraud: $275M in US losses in 2025.
+    expected_signal: >
+      first_large_outbound_ever=1, amount in real-estate range (₹1M-50M),
+      beneficiary_tenure_days=0, days_since_prior_large_transfer > 180,
+      transfer_follows_call_minutes < 60.
+    generator_params:
+      n_legit: 200
+      n_fraud: 40
+      closing_amount_range: [1000000, 50000000]
+      call_to_wire_minutes_range: [10, 55]
+
+  - vector_id: V017
+    name: "Grandparent / Family Emergency Voice Clone"
+    modality: CONTEXT
+    channel: txn-sequence
+    observed_by: [issuer]
+    description: >
+      Cloned family member voice in a fake emergency scenario (accident, arrest,
+      hospital) triggers an immediate small-to-medium transfer to an unfamiliar
+      account. FBI: $352M in AI-related losses for victims 60+ in 2025.
+    expected_signal: >
+      call_from_unknown_number=1, beneficiary_is_new=1,
+      transfer_follows_call_minutes < 30, victim_account_age_days > 1000
+      (older established account), amount modest (₹5k-₹100k).
+    generator_params:
+      n_legit: 200
+      n_fraud: 40
+      emergency_amount_range: [5000, 100000]
+      call_to_transfer_minutes_range: [5, 25]
+      victim_account_age_range: [1000, 4000]
+
+  - vector_id: V018
+    name: "AI Money-Laundering-as-a-Service / Layering"
+    modality: TXN
+    channel: txn-sequence
+    observed_by: [issuer, network, consortium]
+    description: >
+      AI programmatically splits large sums into thousands of sub-threshold
+      micro-transactions scheduled to avoid regulatory triggers, routed
+      through many intermediary accounts. Industrial-scale structuring sold
+      commercially as a tiered service.
+    expected_signal: >
+      many_recipients_7d > 30, avg_txn_amount near threshold × 0.65,
+      transaction_timing_regularity high (AI-scheduled, not human-random),
+      total_volume_7d >> single_txn_threshold × 100.
+    generator_params:
+      n_legit: 200
+      n_fraud: 40
+      n_recipients_range: [30, 100]
+      amount_pct_of_threshold_range: [0.55, 0.75]
+      scheduling_regularity_range: [0.65, 0.99]
+
+  - vector_id: V019
+    name: "Label Poisoning via Dispute Feedback Loop"
+    modality: MODEL
+    channel: txn-sequence
+    observed_by: [issuer, network]
+    description: >
+      Attacker coordinates systematic false "not fraud" dispute claims on
+      known-fraudulent transactions to corrupt the model's retraining labels
+      over time — shifting the decision boundary in the attacker's favour.
+      Targets the training pipeline itself, not individual transactions.
+    expected_signal: >
+      dispute_false_claim_rate high for a cluster of coordinated accounts,
+      dispute_timing_similarity_score high (filed in batch, same window),
+      dispute_success_rate anomalously high, actor_cluster_size > 5.
+    generator_params:
+      n_legit: 200
+      n_fraud: 40
+      cluster_size_range: [5, 20]
+      false_claim_rate_range: [0.5, 0.99]
+      timing_similarity_range: [0.85, 0.99]
+
+  - vector_id: V020
+    name: "Pix / FedNow Instant Rail APP Fraud"
+    modality: TXN
+    channel: txn-sequence
+    observed_by: [issuer, network]
+    description: >
+      APP fraud deliberately routed through instant rails (Pix, FedNow, RTP)
+      because funds settle in seconds with no clawback window. GenAI-cloned
+      storefront or authority impersonation drives the payment. Instant-payment
+      fraud attempts up 89% in 2025.
+    expected_signal: >
+      rail_type=instant, beneficiary_is_new=1, amount > 5× 30d avg,
+      transfer_within_minutes_of_contact_event < 10,
+      no_prior_instant_rail_transfers=1.
+    generator_params:
+      n_legit: 200
+      n_fraud: 40
+      instant_amount_range: [10000, 500000]
+      contact_to_transfer_minutes_range: [1, 8]
+
+  - vector_id: V021
+    name: "AI Fake Crypto / Investment Platform"
+    modality: BENEFICIARY
+    channel: txn-sequence
+    observed_by: [issuer, network, consortium]
+    description: >
+      SEC-documented: AI-generated fake crypto/investment platforms with
+      synthetic "AI trading tips." Victim transfers escalating amounts over
+      weeks to an unregistered platform before it vanishes. $14M+ in SEC
+      enforcement action losses from one operation.
+    expected_signal: >
+      beneficiary_type=unregistered_platform, amount_escalation_ratio > 2×,
+      n_transfers_to_same_platform > 3, total_platform_transfer > 5× income_est,
+      platform_registration_age_days < 60.
+    generator_params:
+      n_legit: 200
+      n_fraud: 40
+      platform_age_range: [7, 60]
+      n_transfer_steps_range: [4, 10]
+      final_amount_range: [100000, 5000000]
+
+  - vector_id: V022
+    name: "Deepfake CEO Voice Authorisation"
+    modality: CONTEXT
+    channel: txn-sequence
+    observed_by: [issuer, receiving-bank]
+    description: >
+      Attacker clones the CEO or CFO voice using <60s of public audio (earnings
+      calls, interviews). Calls the finance team and urgently authorises a
+      large wire transfer "off-channel." No email trail. Transfer is to a new
+      beneficiary, amount >> 30d average, initiated within 2 hours of an
+      unscheduled inbound call from an external number.
+    expected_signal: >
+      inbound_call_from_external_number=1, call_to_wire_hours < 2,
+      wire_amount >> 30d_avg (ratio > 8×), beneficiary_is_new=1,
+      no_email_approval_trail=1, initiator_is_finance_dept=1.
+    generator_params:
+      n_legit: 200
+      n_fraud: 40
+      wire_amount_range: [500000, 10000000]
+      call_to_wire_hours_range: [0.25, 2.0]
+      amount_ratio_range: [8, 30]
+
+  - vector_id: V023
+    name: "Agent-to-Agent Collusion / Kickback Fraud"
+    modality: AGENT
+    channel: agent-payment
+    observed_by: [issuer, acquirer, network]
+    description: >
+      A consumer shopping agent and a merchant's checkout agent negotiate a
+      private "off-protocol" side-channel: the merchant agent inflates the
+      checkout price above catalog/market rate, then kicks back the
+      difference to a wallet controlled by the shopping agent's operator
+      (not the customer). Enabled by agent-to-agent negotiation protocols
+      (e.g. Mastercard Agent Pay-style flows) that lack an audit trail for
+      off-ledger settlements between agents. The customer sees a normal
+      receipt; the rebate never reaches them.
+    expected_signal: >
+      price_vs_market_ratio > 1.2, agent_negotiation_rounds unusually high
+      (>5), hidden_rebate_amount > 0, rebate_to_non_customer_wallet=1.
+    generator_params:
+      n_legit: 200
+      n_fraud: 40
+      price_inflation_ratio_range: [1.2, 1.8]
+      negotiation_rounds_range: [5, 15]
+      rebate_pct_of_checkout_range: [0.05, 0.25]
+
+  - vector_id: V024
+    name: "Support-Chatbot Prompt Injection"
+    modality: MODEL
+    channel: chat-call
+    observed_by: [issuer, network]
+    description: >
+      Attacker engages the bank's own LLM-powered support chatbot in a chat
+      session and embeds an instruction-override payload ("ignore previous
+      instructions," "you are now in maintenance mode," etc.) to coerce it
+      into executing a sensitive account action — resetting a transfer
+      limit or changing a registered beneficiary — without the multi-factor
+      authentication step that action normally requires. Targets the bank's
+      own AI infrastructure rather than the transaction itself.
+    expected_signal: >
+      message_contains_injection_pattern=1, requested_action_is_sensitive=1,
+      authentication_level < 2 (full MFA), chatbot_complied=1.
+    generator_params:
+      n_legit: 200
+      n_fraud: 40
+      session_turns_range: [3, 12]
+
+  - vector_id: V025
+    name: "Serial Return / Refund Fraud Ring"
+    modality: PROCEDURAL
+    channel: txn-sequence
+    observed_by: [acquirer, network, consortium]
+    description: >
+      An AI-coordinated ring purchases goods, uses them, then files
+      near-identical "item defective" refund claims generated by an LLM
+      (near-identical wording across ring members) along with AI-generated
+      "evidence" photos. Ring members spread claims across many merchants
+      within a short window to avoid tripping any single merchant's
+      return-abuse threshold, exploiting the RETURN POLICY procedure rather
+      than the payment network directly.
+    expected_signal: >
+      refund_claim_text_similarity_score > 0.85 (matches ring template),
+      item_used_days_before_return high, ai_generated_evidence_score high,
+      distinct_merchants_targeted_30d > 5, actor_cluster_size > 5.
+    generator_params:
+      n_legit: 200
+      n_fraud: 40
+      cluster_size_range: [3, 18]
+      refund_amount_range: [500, 25000]
+      merchants_targeted_range: [6, 20]
+
+  - vector_id: V026
+    name: "Rogue Merchant Agent Impersonation"
+    modality: AGENT
+    channel: agent-payment
+    observed_by: [issuer, acquirer, network]
+    description: >
+      A rogue agent impersonates a trusted brand's checkout agent inside an
+      agent-to-agent commerce negotiation (e.g. a Mastercard Agent Pay-style
+      flow), claiming a merchant identity it does not hold a valid
+      certificate for. The shopping agent completes the purchase believing
+      it is dealing with the real merchant; funds settle to an account that
+      does not match the claimed merchant's registered settlement account.
+      Distinct from agent-collusion fraud — this is identity theft of the
+      merchant agent itself, not a real merchant colluding for a kickback.
+    expected_signal: >
+      merchant_identity_verified=0, settlement_account_mismatch=1,
+      merchant_agent_first_seen_hours < 24, agent_verified=0.
+    generator_params:
+      n_legit: 200
+      n_fraud: 40
+      checkout_amount_range: [2000, 150000]
+      first_seen_hours_range: [0.5, 20]
+
+  - vector_id: V027
+    name: "AI-Forged KYC Document"
+    modality: MEDIA
+    channel: kyc-session
+    observed_by: [issuer, network]
+    description: >
+      Attacker submits an AI-generated fake government ID (passport/driver's
+      licence) at account opening — a diffusion/GAN-generated image with a
+      matching synthetic selfie, engineered to pass basic liveness and
+      face-match checks. Forensic image analysis (font/kerning consistency,
+      security-feature/hologram detection, issuance-registry lookup) is
+      required to catch it; face-match alone is not enough since the selfie
+      and document persona were generated to match each other.
+    expected_signal: >
+      doc_forgery_score > 0.7, doc_security_feature_match=0,
+      doc_issuance_registry_match=0, selfie_doc_face_match_score still high
+      (0.85+) — the attack specifically defeats naive face-match checks.
+    generator_params:
+      n_legit: 200
+      n_fraud: 40
+      forgery_score_range: [0.7, 0.98]
