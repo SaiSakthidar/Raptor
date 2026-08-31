@@ -4,7 +4,7 @@
 
 ### Real-time Adversarial Payment Threat Orchestrator
 
-**Mastercard Innovation Challenge 2026 · Team Arintra · GFF Mumbai, 8–11 Sept 2026**
+**Mastercard Innovation Challenge 2026 · **
 
 ![Python](https://img.shields.io/badge/Python-3.11-blue?style=flat-square&logo=python&logoColor=white)
 ![Vectors](https://img.shields.io/badge/Attack%20Vectors-31-red?style=flat-square)
@@ -456,15 +456,6 @@ python -m red.threat_ingest "Attackers are using AI-generated voice calls to..."
 | Live proof | Generate a new synthetic actor on demand, score it live | Pre-computed numbers |
 | Threat ingestion | LLM converts any article/note into a live simulator | Manual analyst work |
 | Fidelity | KS, DCR, TSTR — three independent realism probes | None |
-
----
-
-## Team
-
-| Name | Contribution |
-|---|---|
-| **Sai Sakthidar** | Red team architecture · Blue stack · Hardening loop · Dashboard · Threat ingest agent |
-| **Sneha Samanta** | Defense layer · Evaluation framework · Fidelity benchmarking |
 
 ---
 
