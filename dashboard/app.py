@@ -5,9 +5,10 @@ Serves the threat intelligence report and proxies result/catalog data.
 Run:  uvicorn dashboard.app:app --host 0.0.0.0 --port 8080 --reload
 """
 import json
+import os
 import yaml
 from pathlib import Path
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 
 app = FastAPI(title="RAPTOR")
@@ -45,6 +46,19 @@ def simulate(vector_id: str):
         return JSONResponse({"error": str(e)}, status_code=404)
     except Exception as e:
         return JSONResponse({"error": f"Simulation failed: {e}"}, status_code=500)
+
+
+@app.post("/api/ingest")
+async def ingest_threat(req: Request):
+    from red.threat_ingest import ingest
+    body = await req.json()
+    text = body.get("text", "").strip()
+    if not text:
+        return JSONResponse({"status": "error", "message": "No text provided"}, status_code=400)
+    if not os.environ.get("ANTHROPIC_API_KEY"):
+        return JSONResponse({"status": "error", "message": "ANTHROPIC_API_KEY not set"}, status_code=503)
+    result = ingest(text)
+    return JSONResponse(result)
 
 
 @app.get("/api/fidelity")
@@ -338,6 +352,22 @@ _HTML = """<!DOCTYPE html>
     .loading { font-family: var(--mono); font-size: 12px; color: var(--mute); padding: 24px 0; }
     .err { font-family: var(--mono); font-size: 12px; color: var(--signal); border: 1px solid var(--signal); padding: 12px 16px; }
 
+    /* ── threat ingest ───────────────────────────────────────────────── */
+    .ingest-area { width: 100%; background: transparent; border: 1px solid var(--line);
+                   color: var(--ink); font-family: var(--mono); font-size: 12px; line-height: 1.7;
+                   padding: 14px 16px; resize: vertical; min-height: 110px;
+                   border-radius: 0; }
+    .ingest-area::placeholder { color: var(--faint); }
+    .ingest-area:focus { outline: none; border-color: var(--accent); }
+    .ingest-row { display: flex; align-items: center; gap: 14px; margin-top: 12px; }
+    .ingest-result { font-family: var(--mono); font-size: 12px; padding: 12px 16px; margin-top: 14px;
+                     border-left: 3px solid; animation: lineIn 0.2s ease forwards; }
+    .ingest-result.added  { border-color: var(--accent); color: var(--ink); background: rgba(61,232,208,.06); }
+    .ingest-result.dup    { border-color: var(--mute);   color: var(--mute); }
+    .ingest-result.error  { border-color: var(--signal); color: var(--signal); }
+    .ingest-spinner { display: none; font-family: var(--mono); font-size: 12px; color: var(--mute); }
+    .ingest-spinner.visible { display: inline; }
+
     @media (max-width: 640px) {
       .page { padding: 32px 16px 64px; }
       .wordmark { font-size: 20px; }
@@ -370,6 +400,7 @@ _HTML = """<!DOCTYPE html>
     <a href="#zeroday">Zero-Day</a>
     <a href="#fidelity">Fidelity</a>
     <a href="#hardening">Hardening</a>
+    <a href="#ingest">Ingest</a>
     <a href="#policy">Policy</a>
     <span class="quicknav-hint">press <kbd>/</kbd> to search</span>
   </nav>
@@ -439,6 +470,18 @@ _HTML = """<!DOCTYPE html>
     <h2>Closed-Loop Hardening</h2>
     <p class="section-note">Each round: perturb known fraud events toward the legit distribution (attacker camouflage), mine the ones that slip past the detector, add as hard negatives, retrain. Attack Success Rate (ASR) is the fraction of perturbed fraud that evades detection — the goal is driving it to zero.</p>
     <div id="hardening-content"><div class="loading">Loading…</div></div>
+  </div>
+
+  <div class="section" id="ingest">
+    <h2>Threat Intelligence Ingest</h2>
+    <p class="section-note">Paste any free-text threat description — a news article, red-team note, or incident report. The agent extracts attack metadata, deduplicates against existing vectors, assigns the next vector ID, generates a working Python simulator, and runs it immediately.</p>
+
+    <textarea id="ingest-text" class="ingest-area" placeholder="e.g. Attackers are using compromised AI-agent sessions to replay OAuth tokens across multiple merchant checkouts, bypassing per-session fraud checks by reusing tokens before the 15-minute TTL expires…"></textarea>
+    <div class="ingest-row">
+      <button id="ingest-btn" class="btn btn-primary">ingest threat</button>
+      <span class="ingest-spinner" id="ingest-spinner">extracting metadata…</span>
+    </div>
+    <div id="ingest-result"></div>
   </div>
 
   <div class="section" id="policy">
@@ -1097,6 +1140,53 @@ function render() {
   renderHardening(_results);
   renderPolicy(_results);
 }
+
+// ── threat ingest ─────────────────────────────────────────────────────
+document.getElementById('ingest-btn').addEventListener('click', async () => {
+  const text = document.getElementById('ingest-text').value.trim();
+  if (!text) return;
+  const btn = document.getElementById('ingest-btn');
+  const spinner = document.getElementById('ingest-spinner');
+  const resultEl = document.getElementById('ingest-result');
+
+  btn.disabled = true;
+  spinner.textContent = 'extracting metadata…';
+  spinner.classList.add('visible');
+  resultEl.innerHTML = '';
+
+  try {
+    const resp = await fetch('/api/ingest', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({text}),
+    });
+    const data = await resp.json();
+
+    if (data.status === 'added') {
+      resultEl.innerHTML = `<div class="ingest-result added">
+        <strong>${data.vector_id} — ${data.name}</strong><br>
+        channel: ${data.channel} · modality: ${data.modality}<br>
+        ${data.message}
+      </div>`;
+      // Reload catalog to show new vector in the ledger
+      setTimeout(loadAll, 800);
+    } else if (data.status === 'duplicate') {
+      resultEl.innerHTML = `<div class="ingest-result dup">
+        Duplicate detected — similar to <strong>${data.vector_id} ${data.name}</strong>.<br>
+        ${data.message}
+      </div>`;
+    } else {
+      resultEl.innerHTML = `<div class="ingest-result error">
+        Error: ${data.message}
+      </div>`;
+    }
+  } catch (e) {
+    resultEl.innerHTML = `<div class="ingest-result error">Request failed: ${e.message}</div>`;
+  } finally {
+    btn.disabled = false;
+    spinner.classList.remove('visible');
+  }
+});
 
 loadAll();
 setInterval(loadAll, 10000);
