@@ -461,6 +461,4 @@ python -m red.threat_ingest "Attackers are using AI-generated voice calls to..."
 
 <div align="center">
 
-*Mastercard Innovation Challenge 2026 · Global Fintech Festival, Mumbai · 8–11 September 2026*
-
 </div>
