@@ -34,6 +34,7 @@ from blue.evaluate import (
     confusion_metrics, friction_cost,
     expected_loss, ood_vs_supervised_breakdown, apply_policy,
 )
+from blue.loop import run_loop
 
 RESULTS_DIR = Path(__file__).parent / "results"
 CHANNELS = ["txn-sequence", "kyc-session", "agent-payment", "chat-call"]
@@ -176,6 +177,26 @@ def run_channel(channel: str) -> dict:
     artifact_path = save_artifacts(channel, clf, vector_clfs, iso, op_threshold, feat_cols)
     print(f"\n  Model artifacts → {artifact_path}")
 
+    # ── 8b. Closed-loop adversarial hardening (3 rounds) ──────────
+    print(f"\n  {'─'*50}")
+    print(f"  CLOSED-LOOP HARDENING  (channel={channel}, rounds=3, alpha=0.30)")
+    print(f"  {'─'*50}")
+    loop_rounds = run_loop(
+        X_train=X_train, y_train=y_train, meta_train=meta_train,
+        X_val=X_val, y_val=y_val, meta_val=meta_val,
+        X_test=X_test, y_test=y_test, meta_test=meta_test,
+        channel=channel,
+        clf_r0=clf, vector_clfs_r0=vector_clfs, iso=iso,
+        op_threshold_r0=op_threshold,
+        n_rounds=3, alpha=0.30,
+    )
+    print(f"\n  Hardening summary:")
+    for rd in loop_rounds:
+        asr_str = f"{rd['attack_success_rate']:.1%}"
+        print(f"    Round {rd['round']}: recall={rd['recall']:.3f}  "
+              f"ROC-AUC={rd['roc_auc']:.4f}  ASR={asr_str}  "
+              f"evasive_mined={rd['n_evasive_mined']}")
+
     # ── 9. Save results ────────────────────────────────────────────
     result = {
         "channel": channel,
@@ -192,6 +213,7 @@ def run_channel(channel: str) -> dict:
         "expected_loss": loss,
         "friction_cost": friction,
         "policy_distribution": policy_counts.to_dict(),
+        "hardening_loop": loop_rounds,
     }
     return result
 
@@ -218,6 +240,17 @@ def main():
         json.dump(all_results, f, indent=2)
     print(f"\n\nAll results saved to blue/results/")
     print(f"Combined summary: {summary_path}")
+
+    # Fidelity benchmarking
+    print(f"\n{'='*60}")
+    print("FIDELITY BENCHMARKING")
+    print(f"{'='*60}")
+    try:
+        from red.fidelity import run_fidelity
+        run_fidelity()
+    except Exception as e:
+        print(f"  Fidelity benchmark failed: {e}")
+        import traceback; traceback.print_exc()
 
 
 if __name__ == "__main__":

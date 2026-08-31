@@ -1,32 +1,37 @@
 #!/bin/bash
-# AEGIS — run helper
+# RAPTOR — run helper
 # Usage:
 #   bash run.sh                   → run blue stack (train + evaluate)
-#   bash run.sh --red             → generate attack data (all 21 vectors)
-#   bash run.sh --ui              → start dashboard on http://localhost:8080
+#   bash run.sh --red             → generate attack data (all 26 vectors)
+#   bash run.sh --ui              → start dashboard on http://localhost:8080 (hot-reload)
 #   bash run.sh --all             → red → blue → ui (full pipeline)
+#   bash run.sh --build           → build docker image
 
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-IMAGE="mastercard-aegis"
+IMAGE="mastercard-raptor"
 
 function run_docker() {
   docker run --rm -v "$SCRIPT_DIR:/app" "$IMAGE" "$@"
 }
 
 function run_ui() {
-  echo "Starting AEGIS dashboard → http://localhost:8080"
+  echo "Starting RAPTOR dashboard → http://localhost:8080"
   docker run --rm \
+    -e RELOAD=1 \
     -v "$SCRIPT_DIR:/app" \
     -p 8080:8080 \
-    "$IMAGE" \
-    uvicorn dashboard.app:app --host 0.0.0.0 --port 8080 --reload
+    "$IMAGE"
 }
 
 case "${1:-}" in
+  --build)
+    echo "=== Building Docker image: $IMAGE ==="
+    docker build -t "$IMAGE" "$SCRIPT_DIR"
+    ;;
   --red)
-    echo "=== Generating attack data (21 vectors) ==="
+    echo "=== Generating attack data ==="
     run_docker python -m red.run_all
     ;;
   --ui)

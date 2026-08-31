@@ -57,6 +57,12 @@ TXN_FEATURES = [
     "item_used_days_before_return", "refund_claim_text_similarity_score",
     "ai_generated_evidence_score", "n_refund_claims_30d",
     "distinct_merchants_targeted_30d",
+    # V028 – MFA push-fatigue
+    "push_count_before_approval", "response_time_seconds", "approval_attempt_number",
+    # V029 – Cuckoo smurfing
+    "inbound_unknown_sender_pct", "time_inbound_to_outbound_hours",
+    # V030 – UPI VPA farm hop laundering
+    "vpa_age_hours", "vpa_count_per_device",
 ]
 
 KYC_FEATURES = [
@@ -89,6 +95,8 @@ AGENT_FEATURES = [
     # V026 – Rogue merchant agent impersonation
     "merchant_identity_verified", "settlement_account_mismatch",
     "merchant_agent_first_seen_hours",
+    # V031 – Agentic token replay
+    "token_age_seconds", "token_reuse_count", "session_ip_changed",
 ]
 
 CHAT_CALL_FEATURES = [

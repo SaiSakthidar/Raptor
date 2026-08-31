@@ -1,8 +1,8 @@
-# AEGIS — Adversarial Engine for GenAI-Powered Fraud Intelligence & Simulation
+# RAPTOR — Real-time Adversarial Payment Threat Orchestrator
 
 **Mastercard Innovation Challenge 2026** · Submitted by Team Arintra
 
-AEGIS is an end-to-end adversarial AI platform that (1) catalogs 27 novel GenAI-powered payment fraud attacks, (2) generates realistic synthetic attack simulations at scale, and (3) defends against them with a three-layer detection stack — all wired together with a live interactive dashboard.
+RAPTOR is an end-to-end adversarial AI platform that (1) catalogs 27 novel GenAI-powered payment fraud attacks, (2) generates realistic synthetic attack simulations at scale, and (3) defends against them with a three-layer detection stack — all wired together with a live interactive dashboard.
 
 ---
 
@@ -25,7 +25,7 @@ AEGIS is an end-to-end adversarial AI platform that (1) catalogs 27 novel GenAI-
 
 Generative AI has fundamentally changed the attacker's toolkit. Fraudsters can now synthesize KYC documents, clone voices, inject prompts into payment agents, and train evasion models against production classifiers — all at near-zero marginal cost. Existing fraud detection systems were built for rule-based or statistical anomalies; they have no simulation infrastructure to discover what the next GenAI attack even looks like.
 
-AEGIS closes that gap.
+RAPTOR closes that gap.
 
 ---
 
@@ -33,7 +33,7 @@ AEGIS closes that gap.
 
 ```
 ┌──────────────────────────────────────────────────────────────────────┐
-│                          AEGIS PLATFORM                              │
+│                          RAPTOR PLATFORM                              │
 │                                                                      │
 │  ┌────────────────────────────────────┐                              │
 │  │          RED TEAM (Simulation)     │                              │
@@ -262,8 +262,8 @@ Features:
 ### Option A — Docker (recommended)
 
 ```bash
-docker build -t aegis .
-docker run -p 8080:8080 aegis          # runs full pipeline + dashboard
+docker build -t raptor .
+docker run -p 8080:8080 raptor         # runs full pipeline + dashboard
 ```
 
 ### Option B — Local
@@ -339,7 +339,7 @@ python -m red.scaffold_generator V028
 ├── dashboard/
 │   └── app.py                   # FastAPI + embedded HTML/CSS/JS
 │
-└── AEGIS_Submission.docx        # formal submission document
+└── RAPTOR_Submission.docx        # formal submission document
 ```
 
 ---

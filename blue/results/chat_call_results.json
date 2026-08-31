@@ -51,5 +51,22 @@
   "policy_distribution": {
     "APPROVE": 251,
     "DECLINE": 10
-  }
+  },
+  "hardening_loop": [
+    {
+      "round": 0,
+      "recall": 1.0,
+      "precision": 1.0,
+      "f1": 1.0,
+      "roc_auc": 1.0,
+      "prauc": 1.0,
+      "prauc_ci_lo": 1.0,
+      "prauc_ci_hi": 1.0,
+      "fpr": 0.0,
+      "attack_success_rate": 0.0,
+      "n_evasive_mined": 0,
+      "n_training_events": 1215,
+      "op_threshold": 0.5
+    }
+  ]
 }

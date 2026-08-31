@@ -574,3 +574,86 @@ vectors:
       n_legit: 200
       n_fraud: 40
       forgery_score_range: [0.7, 0.98]
+
+  - vector_id: V028
+    name: "MFA Push-Fatigue Attack"
+    modality: ATO
+    channel: txn-sequence
+    observed_by: [issuer, network]
+    description: >
+      Attacker triggers repeated MFA push notifications to the victim until
+      they accidentally approve one (push-fatigue / MFA bombing). After
+      approval, attacker drains the account via instant rail transfer.
+      GenAI enables mass targeting — LLMs automate the social-engineering
+      call that runs in parallel with the push spam.
+    expected_signal: >
+      push_count_before_approval high (>5), response_time_seconds low on
+      the approving push, approval_attempt_number high, immediate large
+      transfer post-approval.
+    generator_params:
+      n_legit: 200
+      n_fraud: 40
+      push_count_range: [6, 25]
+      amount_range: [10000, 200000]
+
+  - vector_id: V029
+    name: "Cuckoo Smurfing"
+    modality: BENEFICIARY
+    channel: txn-sequence
+    observed_by: [issuer, acquirer]
+    description: >
+      Criminal deposits funds into accounts of unwitting third parties who
+      are expecting a legitimate inbound transfer (e.g. overseas remittance).
+      The legitimate recipient never questions the credit; the criminal
+      arranges a matching outbound from the same account. Unlike structuring,
+      the victim does not know their account is being used — the signal is
+      high inbound-sender diversity from unknown senders, immediately
+      followed by outbound pass-through at near-100%.
+    expected_signal: >
+      inbound_unknown_sender_pct high, pass_through_ratio > 0.95,
+      inbound_sender_count_7d high, time_inbound_to_outbound_hours < 6.
+    generator_params:
+      n_legit: 200
+      n_fraud: 40
+      amount_range: [5000, 100000]
+      pass_through_pct_range: [0.92, 1.0]
+
+  - vector_id: V030
+    name: "UPI VPA Farm Hop Laundering"
+    modality: TXN
+    channel: txn-sequence
+    observed_by: [issuer, network]
+    description: >
+      Attacker mass-creates Virtual Payment Addresses on payments banks
+      (Paytm, Airtel Money, NSDL etc.) — each account opened with synthetic
+      KYC. Funds hop across 4-6 VPAs in under 15 minutes before exiting
+      via P2M or cash-out, exploiting the instant-settlement nature of UPI
+      and the fragmented KYC across payments-bank issuers.
+    expected_signal: >
+      vpa_age_hours < 48, upi_transfers_15min high, hop_count_in_chain > 3,
+      vpa_count_per_device > 3, is_new_vpa=1 on each hop.
+    generator_params:
+      n_legit: 200
+      n_fraud: 40
+      hop_count_range: [4, 7]
+      amount_range: [2000, 80000]
+
+  - vector_id: V031
+    name: "Agentic Token Replay"
+    modality: AGENT
+    channel: agent-payment
+    observed_by: [issuer, acquirer, network]
+    description: >
+      Attacker intercepts or extracts a valid session token from a prior
+      legitimate agent-payment session and replays it after expiry to
+      initiate a new payment. The token passes signature checks because it
+      was legitimately issued; the attack exploits insufficient expiry
+      enforcement or clock-skew in the agent orchestration layer.
+    expected_signal: >
+      token_age_seconds high (> expected TTL), token_reuse_count > 1,
+      session_ip_changed=1, agent_verified=0 on replay session.
+    generator_params:
+      n_legit: 200
+      n_fraud: 40
+      token_age_range: [3600, 86400]
+      amount_range: [1000, 50000]

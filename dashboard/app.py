@@ -1,5 +1,5 @@
 """
-AEGIS Dashboard — FastAPI backend
+RAPTOR Dashboard — FastAPI backend
 Serves the threat intelligence report and proxies result/catalog data.
 
 Run:  uvicorn dashboard.app:app --host 0.0.0.0 --port 8080 --reload
@@ -10,7 +10,7 @@ from pathlib import Path
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse, JSONResponse
 
-app = FastAPI(title="AEGIS")
+app = FastAPI(title="RAPTOR")
 BASE = Path(__file__).parent.parent
 
 
@@ -47,6 +47,14 @@ def simulate(vector_id: str):
         return JSONResponse({"error": f"Simulation failed: {e}"}, status_code=500)
 
 
+@app.get("/api/fidelity")
+def fidelity():
+    p = BASE / "blue/results/fidelity.json"
+    if not p.exists():
+        return JSONResponse({"error": "Fidelity results not found. Run: python -m blue.run_blue"}, status_code=503)
+    return JSONResponse(json.loads(p.read_text()))
+
+
 @app.get("/health")
 def health():
     return {"status": "ok"}
@@ -57,7 +65,7 @@ _HTML = """<!DOCTYPE html>
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AEGIS · Adversarial Fraud Intelligence</title>
+  <title>RAPTOR · Real-time Adversarial Payment Threat Orchestrator</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
@@ -288,6 +296,32 @@ _HTML = """<!DOCTYPE html>
     .callout-text .figure { font-family: var(--mono); font-weight: 600; }
     .callout-text .rise { color: var(--accent); font-family: var(--mono); font-style: normal; }
 
+    /* ── hardening loop ──────────────────────────────────────────── */
+    .hardening-table { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 13px; margin-top: 18px; }
+    .hardening-table th { text-align: left; color: var(--mute); font-weight: 500; padding: 6px 14px 6px 0; border-bottom: 1px solid var(--line); }
+    .hardening-table td { padding: 8px 14px 8px 0; border-bottom: 1px solid rgba(255,255,255,.04); }
+    .hardening-table tr:last-child td { border-bottom: none; }
+    .asr-bar-wrap { display: flex; align-items: center; gap: 10px; }
+    .asr-bar-bg { flex: 1; height: 6px; background: rgba(255,255,255,.07); border-radius: 3px; max-width: 140px; }
+    .asr-bar-fill { height: 6px; border-radius: 3px; transition: width .4s ease; }
+    .round-badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+    .round-0 { background: rgba(255,255,255,.07); color: var(--mute); }
+    .round-n { background: rgba(61,232,208,.12); color: var(--accent); }
+    .hardening-channel-label { font-size: 12px; color: var(--mute); margin-top: 22px; margin-bottom: 4px; letter-spacing: .06em; text-transform: uppercase; }
+    .hardening-channel-label:first-child { margin-top: 0; }
+
+    /* ── fidelity benchmarks ─────────────────────────────────────── */
+    .fidelity-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; margin-top: 18px; }
+    .fidelity-card { border: 1px solid var(--line); border-radius: 4px; padding: 16px 18px; }
+    .fidelity-channel { font-family: var(--mono); font-size: 10px; color: var(--mute); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 10px; }
+    .fidelity-metric { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+    .fidelity-label { font-family: var(--mono); font-size: 11px; color: var(--mute); }
+    .fidelity-value { font-family: var(--mono); font-size: 13px; font-weight: 600; }
+    .fidelity-bar-wrap { margin-top: 12px; }
+    .fidelity-bar-label { font-family: var(--mono); font-size: 10px; color: var(--mute); margin-bottom: 4px; display: flex; justify-content: space-between; }
+    .fidelity-bar-bg { height: 4px; background: rgba(255,255,255,.07); border-radius: 2px; }
+    .fidelity-bar-fill { height: 4px; border-radius: 2px; }
+
     /* ── policy distribution ─────────────────────────────────────── */
     .policy-track { display: flex; height: 22px; border: 1px solid var(--line); }
     .policy-seg { display: flex; align-items: center; justify-content: center;
@@ -318,7 +352,7 @@ _HTML = """<!DOCTYPE html>
 
   <div class="masthead">
     <div class="wordmark-wrap">
-      <div class="wordmark">AEGIS</div>
+      <div class="wordmark">RAPTOR</div>
       <div class="wordmark-mark"></div>
     </div>
     <div class="masthead-right">
@@ -326,7 +360,7 @@ _HTML = """<!DOCTYPE html>
     </div>
   </div>
   <div class="masthead-sub">
-    <p>Adversarial fraud intelligence — Mastercard Innovation Challenge 2026. A red-team simulator and three-layer defense stack, evaluated on held-out synthetic data.</p>
+    <p>Real-time Adversarial Payment Threat Orchestrator — Mastercard Innovation Challenge 2026. A closed-loop red-team simulator and three-layer defense stack, evaluated on held-out synthetic data.</p>
   </div>
 
   <nav class="quicknav">
@@ -334,6 +368,8 @@ _HTML = """<!DOCTYPE html>
     <a href="#ledger">Ledger</a>
     <a href="#modality">Modality</a>
     <a href="#zeroday">Zero-Day</a>
+    <a href="#fidelity">Fidelity</a>
+    <a href="#hardening">Hardening</a>
     <a href="#policy">Policy</a>
     <span class="quicknav-hint">press <kbd>/</kbd> to search</span>
   </nav>
@@ -393,6 +429,18 @@ _HTML = """<!DOCTYPE html>
     <div id="zeroday-callouts"><div class="loading">Loading…</div></div>
   </div>
 
+  <div class="section" id="fidelity">
+    <h2>Data Fidelity</h2>
+    <p class="section-note">Three independent fidelity probes on the synthetic attack data. KS stat measures marginal distribution overlap between fraud and legit — lower is more realistic. DCR ratio measures whether fraud events are more similar to each other than to legit (ratio &gt; 1 = genuinely separable joint distribution, not just marginal leakage). TSTR is PR-AUC on the held-out test set — the synthetic-to-synthetic generalization score.</p>
+    <div id="fidelity-content"><div class="loading">Loading…</div></div>
+  </div>
+
+  <div class="section" id="hardening">
+    <h2>Closed-Loop Hardening</h2>
+    <p class="section-note">Each round: perturb known fraud events toward the legit distribution (attacker camouflage), mine the ones that slip past the detector, add as hard negatives, retrain. Attack Success Rate (ASR) is the fraction of perturbed fraud that evades detection — the goal is driving it to zero.</p>
+    <div id="hardening-content"><div class="loading">Loading…</div></div>
+  </div>
+
   <div class="section" id="policy">
     <h2>Policy Distribution</h2>
     <p class="section-note">Disposition of held-out events at the chosen operating point (≤1% false-positive budget).</p>
@@ -447,16 +495,17 @@ const STAT_ICON = {
 };
 const CHEVRON = '<svg width="10" height="10" viewBox="0 0 16 16" class="chevron"><path d="M5 3l4 5-4 5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
-let _catalog = null, _results = null, _controlsWired = false;
+let _catalog = null, _results = null, _fidelity = null, _controlsWired = false;
 
 async function loadAll() {
   try {
-    const [c, r] = await Promise.all([
+    const [c, r, f] = await Promise.all([
       fetch('/api/catalog').then(x => x.json()),
       fetch('/api/results').then(x => x.json()),
+      fetch('/api/fidelity').then(x => x.json()).catch(() => null),
     ]);
     if (r.error) { showError(r.error); return; }
-    _catalog = c; _results = r;
+    _catalog = c; _results = r; _fidelity = f;
     if (!_controlsWired) {
       buildModalityChips(_catalog);
       wireLedgerControls();
@@ -895,6 +944,68 @@ function renderZeroDay(catalog, results) {
   document.getElementById('zeroday-callouts').innerHTML = html;
 }
 
+// ── closed-loop hardening ─────────────────────────────────────────────
+function renderHardening(results) {
+  const el = document.getElementById('hardening-content');
+  if (!el) return;
+
+  const channels = Object.keys(results).filter(ch => (results[ch].hardening_loop || []).length > 0);
+  if (channels.length === 0) {
+    el.innerHTML = '<div class="loading">Hardening loop not yet run — execute <code>python -m blue.run_blue</code> to generate.</div>';
+    return;
+  }
+
+  let maxAsr = 0;
+  channels.forEach(ch => {
+    (results[ch].hardening_loop || []).forEach(rd => { if (rd.attack_success_rate > maxAsr) maxAsr = rd.attack_success_rate; });
+  });
+  if (maxAsr === 0) maxAsr = 1;
+
+  let html = '';
+  channels.forEach(ch => {
+    const rounds = results[ch].hardening_loop || [];
+    if (!rounds.length) return;
+    const r0 = rounds[0];
+    const rN = rounds[rounds.length - 1];
+    const asrDrop = ((r0.attack_success_rate - rN.attack_success_rate) / Math.max(r0.attack_success_rate, 0.001) * 100).toFixed(0);
+    const recallGain = ((rN.recall - r0.recall) * 100).toFixed(1);
+
+    html += `<div class="hardening-channel-label">${ch}</div>`;
+    html += `<table class="hardening-table"><thead><tr>
+        <th>round</th><th>ASR ↓</th><th style="min-width:140px"></th>
+        <th>recall</th><th>ROC-AUC</th><th>PR-AUC</th><th>hard negatives</th>
+      </tr></thead><tbody>`;
+
+    rounds.forEach(rd => {
+      const isBase = rd.round === 0;
+      const asrPct = (rd.attack_success_rate * 100).toFixed(1);
+      const barWidth = Math.round((rd.attack_success_rate / maxAsr) * 100);
+      const barColor = isBase ? 'rgba(255,59,78,.6)' : 'rgba(61,232,208,.7)';
+      const badge = isBase
+        ? `<span class="round-badge round-0">baseline</span>`
+        : `<span class="round-badge round-n">round ${rd.round}</span>`;
+      html += `<tr>
+        <td>${badge}</td>
+        <td style="color:${isBase ? 'var(--signal)' : 'var(--accent)'};font-weight:600">${asrPct}%</td>
+        <td><div class="asr-bar-wrap"><div class="asr-bar-bg"><div class="asr-bar-fill" style="width:${barWidth}%;background:${barColor}"></div></div></div></td>
+        <td>${(rd.recall * 100).toFixed(1)}%</td>
+        <td>${rd.roc_auc.toFixed(4)}</td>
+        <td>${rd.prauc.toFixed(3)} <span style="color:var(--mute);font-size:11px">[${rd.prauc_ci_lo.toFixed(3)}–${rd.prauc_ci_hi.toFixed(3)}]</span></td>
+        <td style="color:var(--mute)">${rd.n_evasive_mined > 0 ? '+' + rd.n_evasive_mined : '—'}</td>
+      </tr>`;
+    });
+
+    const gainColor = parseFloat(recallGain) >= 0 ? 'var(--accent)' : 'var(--signal)';
+    html += `</tbody></table>
+      <div style="font-family:var(--mono);font-size:12px;color:var(--mute);margin-top:10px;margin-bottom:6px">
+        ASR reduced <span style="color:var(--accent);font-weight:600">${asrDrop}%</span> over ${rounds.length - 1} round${rounds.length > 2 ? 's' : ''} ·
+        recall delta <span style="color:${gainColor};font-weight:600">${parseFloat(recallGain) >= 0 ? '+' : ''}${recallGain}pp</span>
+      </div>`;
+  });
+
+  el.innerHTML = html;
+}
+
 // ── policy distribution ───────────────────────────────────────────────
 const POLICY_CFG = [
   { key: 'APPROVE', label: 'approve' },
@@ -925,11 +1036,65 @@ function renderPolicy(results) {
   document.getElementById('policy-legend').innerHTML = legend;
 }
 
+// ── fidelity benchmarks ───────────────────────────────────────────────
+function renderFidelity(fidelity) {
+  const el = document.getElementById('fidelity-content');
+  if (!el) return;
+  if (!fidelity || fidelity.error) {
+    el.innerHTML = '<div class="loading">Fidelity data not yet generated — run <code>python -m blue.run_blue</code>.</div>';
+    return;
+  }
+  const channels = Object.keys(fidelity);
+  if (!channels.length) { el.innerHTML = '<div class="loading">No fidelity data.</div>'; return; }
+
+  let html = '<div class="fidelity-grid">';
+  channels.forEach(ch => {
+    const d = fidelity[ch];
+    if (!d) return;
+    const ks = d.ks_mean != null ? d.ks_mean.toFixed(3) : '—';
+    const ksColor = d.ks_mean < 0.4 ? 'var(--accent)' : d.ks_mean < 0.65 ? 'var(--ink)' : 'var(--signal)';
+    const dcr = d.dcr_ratio != null ? d.dcr_ratio.toFixed(2) + '×' : '—';
+    const dcrColor = d.dcr_ratio > 1.5 ? 'var(--accent)' : d.dcr_ratio > 1.0 ? 'var(--ink)' : 'var(--signal)';
+    const tstr = d.tstr_prauc != null ? (d.tstr_prauc * 100).toFixed(1) + '%' : '—';
+    const overlapPct = d.ks_pct_realistic_overlap != null ? d.ks_pct_realistic_overlap : 0;
+    const zeroOverlap = d.ks_zero_overlap_features ? d.ks_zero_overlap_features.length : 0;
+
+    html += `<div class="fidelity-card">
+      <div class="fidelity-channel">${ch}</div>
+      <div class="fidelity-metric">
+        <span class="fidelity-label">KS mean</span>
+        <span class="fidelity-value" style="color:${ksColor}">${ks}</span>
+      </div>
+      <div class="fidelity-metric">
+        <span class="fidelity-label">DCR ratio</span>
+        <span class="fidelity-value" style="color:${dcrColor}">${dcr}</span>
+      </div>
+      <div class="fidelity-metric">
+        <span class="fidelity-label">TSTR PR-AUC</span>
+        <span class="fidelity-value">${tstr}</span>
+      </div>
+      <div class="fidelity-bar-wrap">
+        <div class="fidelity-bar-label">
+          <span>realistic overlap</span><span>${overlapPct}% features</span>
+        </div>
+        <div class="fidelity-bar-bg">
+          <div class="fidelity-bar-fill" style="width:${overlapPct}%;background:var(--accent)"></div>
+        </div>
+      </div>
+      ${zeroOverlap > 0 ? `<div style="font-family:var(--mono);font-size:10px;color:var(--signal);margin-top:8px">${zeroOverlap} zero-overlap feature${zeroOverlap > 1 ? 's' : ''}</div>` : ''}
+    </div>`;
+  });
+  html += '</div>';
+  el.innerHTML = html;
+}
+
 function render() {
   renderHeadline(_catalog, _results);
   renderLedger(_catalog, _results);
   renderModality(_catalog, _results);
   renderZeroDay(_catalog, _results);
+  renderFidelity(_fidelity);
+  renderHardening(_results);
   renderPolicy(_results);
 }
 

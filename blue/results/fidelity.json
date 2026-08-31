@@ -1,0 +1,580 @@
+{
+  "txn-sequence": {
+    "n_features": 75,
+    "ks_mean": 0.1038,
+    "ks_pct_realistic_overlap": 93.3,
+    "ks_pct_near_perfect_separation": 0.0,
+    "ks_zero_overlap_features": [],
+    "ks_per_feature": [
+      {
+        "feature": "txn_count_last_1hr",
+        "ks_stat": 0.6282
+      },
+      {
+        "feature": "time_since_prev_txn_sec",
+        "ks_stat": 0.6282
+      },
+      {
+        "feature": "sum_amount_last_1hr",
+        "ks_stat": 0.5894
+      },
+      {
+        "feature": "ef_account_age_days",
+        "ks_stat": 0.5328
+      },
+      {
+        "feature": "amount",
+        "ks_stat": 0.5305
+      },
+      {
+        "feature": "scheduling_regularity",
+        "ks_stat": 0.4333
+      },
+      {
+        "feature": "amount_pct_of_threshold",
+        "ks_stat": 0.4309
+      },
+      {
+        "feature": "total_volume_7d",
+        "ks_stat": 0.4135
+      },
+      {
+        "feature": "recipients_7d",
+        "ks_stat": 0.3938
+      },
+      {
+        "feature": "amount_vs_30d_avg_ratio",
+        "ks_stat": 0.1582
+      },
+      {
+        "feature": "actor_cluster_size",
+        "ks_stat": 0.1228
+      },
+      {
+        "feature": "beneficiary_tenure_days",
+        "ks_stat": 0.1129
+      },
+      {
+        "feature": "same_mcc_count_last_1hr",
+        "ks_stat": 0.093
+      },
+      {
+        "feature": "item_used_days_before_return",
+        "ks_stat": 0.0841
+      },
+      {
+        "feature": "refund_claim_text_similarity_score",
+        "ks_stat": 0.0841
+      },
+      {
+        "feature": "ai_generated_evidence_score",
+        "ks_stat": 0.0841
+      },
+      {
+        "feature": "n_refund_claims_30d",
+        "ks_stat": 0.0841
+      },
+      {
+        "feature": "distinct_merchants_targeted_30d",
+        "ks_stat": 0.0841
+      },
+      {
+        "feature": "dispute_rate_30d",
+        "ks_stat": 0.0814
+      },
+      {
+        "feature": "dispute_text_perplexity",
+        "ks_stat": 0.0792
+      },
+      {
+        "feature": "dispute_text_sentence_len_variance",
+        "ks_stat": 0.0792
+      },
+      {
+        "feature": "amount_escalation_ratio",
+        "ks_stat": 0.0689
+      },
+      {
+        "feature": "upi_transfers_15min",
+        "ks_stat": 0.0689
+      },
+      {
+        "feature": "urgency_score",
+        "ks_stat": 0.068
+      },
+      {
+        "feature": "is_new_vpa",
+        "ks_stat": 0.0672
+      },
+      {
+        "feature": "pass_through_ratio",
+        "ks_stat": 0.0646
+      },
+      {
+        "feature": "sim_swap_preceding_transfer_hours",
+        "ks_stat": 0.0592
+      },
+      {
+        "feature": "inbound_sender_count_7d",
+        "ks_stat": 0.0578
+      },
+      {
+        "feature": "call_precedes_transfer_minutes",
+        "ks_stat": 0.0575
+      },
+      {
+        "feature": "contact_age_days",
+        "ks_stat": 0.0555
+      },
+      {
+        "feature": "hour_of_day",
+        "ks_stat": 0.055
+      },
+      {
+        "feature": "contact_to_transfer_minutes",
+        "ks_stat": 0.0547
+      },
+      {
+        "feature": "has_ai_evidence_image",
+        "ks_stat": 0.0545
+      },
+      {
+        "feature": "avg_dwell_hours",
+        "ks_stat": 0.0535
+      },
+      {
+        "feature": "retail_txn_ratio",
+        "ks_stat": 0.0535
+      },
+      {
+        "feature": "time_inbound_to_outbound_hours",
+        "ks_stat": 0.0516
+      },
+      {
+        "feature": "prior_transfer_count",
+        "ks_stat": 0.0512
+      },
+      {
+        "feature": "amount_vs_30d_max_ratio",
+        "ks_stat": 0.0509
+      },
+      {
+        "feature": "prior_large_transfer_count",
+        "ks_stat": 0.0477
+      },
+      {
+        "feature": "transfer_follows_call_minutes",
+        "ks_stat": 0.0461
+      },
+      {
+        "feature": "outbound_recipient_count_7d",
+        "ks_stat": 0.0421
+      },
+      {
+        "feature": "vpa_age_hours",
+        "ks_stat": 0.0418
+      },
+      {
+        "feature": "prior_instant_rail_transfers",
+        "ks_stat": 0.0402
+      },
+      {
+        "feature": "response_time_seconds",
+        "ks_stat": 0.04
+      },
+      {
+        "feature": "beneficiary_type_is_platform",
+        "ks_stat": 0.0389
+      },
+      {
+        "feature": "platform_registration_age_days",
+        "ks_stat": 0.0389
+      },
+      {
+        "feature": "n_transfers_to_platform",
+        "ks_stat": 0.0389
+      },
+      {
+        "feature": "dispute_false_claim_rate",
+        "ks_stat": 0.0387
+      },
+      {
+        "feature": "dispute_timing_similarity_score",
+        "ks_stat": 0.0387
+      },
+      {
+        "feature": "n_disputes_30d",
+        "ks_stat": 0.0387
+      },
+      {
+        "feature": "call_to_wire_hours",
+        "ks_stat": 0.0386
+      },
+      {
+        "feature": "call_precedes_wire_minutes",
+        "ks_stat": 0.0381
+      },
+      {
+        "feature": "inbound_unknown_sender_pct",
+        "ks_stat": 0.0379
+      },
+      {
+        "feature": "is_new_beneficiary",
+        "ks_stat": 0.0372
+      },
+      {
+        "feature": "dispute_success_rate",
+        "ks_stat": 0.0363
+      },
+      {
+        "feature": "vpa_count_per_device",
+        "ks_stat": 0.0348
+      },
+      {
+        "feature": "device_changed_flag",
+        "ks_stat": 0.0341
+      },
+      {
+        "feature": "push_count_before_approval",
+        "ks_stat": 0.0335
+      },
+      {
+        "feature": "approval_attempt_number",
+        "ks_stat": 0.0335
+      },
+      {
+        "feature": "amount_to_threshold_ratio",
+        "ks_stat": 0.0328
+      },
+      {
+        "feature": "beneficiary_is_new",
+        "ks_stat": 0.0327
+      },
+      {
+        "feature": "is_investment_platform",
+        "ks_stat": 0.0325
+      },
+      {
+        "feature": "days_since_prior_large_transfer",
+        "ks_stat": 0.0315
+      },
+      {
+        "feature": "phone_confirmation",
+        "ks_stat": 0.0291
+      },
+      {
+        "feature": "vendor_tenure_days",
+        "ks_stat": 0.0226
+      },
+      {
+        "feature": "is_online",
+        "ks_stat": 0.0164
+      },
+      {
+        "feature": "otp_source_changed",
+        "ks_stat": 0.0065
+      },
+      {
+        "feature": "device_is_new",
+        "ks_stat": 0.0065
+      },
+      {
+        "feature": "bank_details_changed",
+        "ks_stat": 0.0065
+      },
+      {
+        "feature": "first_large_outbound_ever",
+        "ks_stat": 0.0065
+      },
+      {
+        "feature": "call_from_unknown_number",
+        "ks_stat": 0.0065
+      },
+      {
+        "feature": "inbound_call_from_external_number",
+        "ks_stat": 0.0065
+      },
+      {
+        "feature": "no_email_approval_trail",
+        "ks_stat": 0.0065
+      },
+      {
+        "feature": "amount_in_realestate_range",
+        "ks_stat": 0.0059
+      },
+      {
+        "feature": "request_via_email_only",
+        "ks_stat": 0.004
+      }
+    ],
+    "dcr_ratio": 1.182,
+    "dcr_d_intra_mean": 0.8276,
+    "dcr_d_cross_mean": 0.9782,
+    "tstr_prauc": 0.8623394092656754,
+    "tstr_roc_auc": 0.9754426972459596,
+    "n_fraud_train": 3801,
+    "n_legit_train": 65450,
+    "n_fraud_test": 1429
+  },
+  "kyc-session": {
+    "n_features": 25,
+    "ks_mean": 0.2647,
+    "ks_pct_realistic_overlap": 84.0,
+    "ks_pct_near_perfect_separation": 0.0,
+    "ks_zero_overlap_features": [],
+    "ks_per_feature": [
+      {
+        "feature": "ef_doc_age_days",
+        "ks_stat": 0.6659
+      },
+      {
+        "feature": "ef_account_age_days",
+        "ks_stat": 0.6104
+      },
+      {
+        "feature": "ef_credit_inquiry_count_7d",
+        "ks_stat": 0.6087
+      },
+      {
+        "feature": "bnpl_merchant_count_7d",
+        "ks_stat": 0.5107
+      },
+      {
+        "feature": "total_bnpl_30d",
+        "ks_stat": 0.4947
+      },
+      {
+        "feature": "credit_utilization",
+        "ks_stat": 0.4869
+      },
+      {
+        "feature": "ef_prior_txn_count",
+        "ks_stat": 0.4241
+      },
+      {
+        "feature": "doc_age_days",
+        "ks_stat": 0.3633
+      },
+      {
+        "feature": "account_age_at_purchase_days",
+        "ks_stat": 0.3305
+      },
+      {
+        "feature": "device_is_known",
+        "ks_stat": 0.3086
+      },
+      {
+        "feature": "caller_number_known",
+        "ks_stat": 0.2568
+      },
+      {
+        "feature": "session_duration_sec",
+        "ks_stat": 0.2315
+      },
+      {
+        "feature": "voice_auth_confidence",
+        "ks_stat": 0.1863
+      },
+      {
+        "feature": "doc_forgery_score",
+        "ks_stat": 0.1223
+      },
+      {
+        "feature": "doc_metadata_age_variance",
+        "ks_stat": 0.1215
+      },
+      {
+        "feature": "doc_security_feature_match",
+        "ks_stat": 0.1215
+      },
+      {
+        "feature": "doc_issuance_registry_match",
+        "ks_stat": 0.1215
+      },
+      {
+        "feature": "liveness_score",
+        "ks_stat": 0.1131
+      },
+      {
+        "feature": "post_auth_transfer_amount",
+        "ks_stat": 0.107
+      },
+      {
+        "feature": "selfie_consistency_score",
+        "ks_stat": 0.1048
+      },
+      {
+        "feature": "device_is_emulator",
+        "ks_stat": 0.0979
+      },
+      {
+        "feature": "ip_is_vpn",
+        "ks_stat": 0.0765
+      },
+      {
+        "feature": "credit_inquiry_count_7d",
+        "ks_stat": 0.0765
+      },
+      {
+        "feature": "account_change_flag",
+        "ks_stat": 0.0612
+      },
+      {
+        "feature": "selfie_doc_face_match_score",
+        "ks_stat": 0.0158
+      }
+    ],
+    "dcr_ratio": 12.054,
+    "dcr_d_intra_mean": 0.0788,
+    "dcr_d_cross_mean": 0.9498,
+    "tstr_prauc": 0.4072939104630794,
+    "tstr_roc_auc": 0.5790395846852693,
+    "n_fraud_train": 246,
+    "n_legit_train": 1134,
+    "n_fraud_test": 67
+  },
+  "agent-payment": {
+    "n_features": 20,
+    "ks_mean": 0.3192,
+    "ks_pct_realistic_overlap": 80.0,
+    "ks_pct_near_perfect_separation": 0.0,
+    "ks_zero_overlap_features": [],
+    "ks_per_feature": [
+      {
+        "feature": "agent_verified",
+        "ks_stat": 0.7682
+      },
+      {
+        "feature": "cart_checkout_delta_pct",
+        "ks_stat": 0.7558
+      },
+      {
+        "feature": "merchant_age_days",
+        "ks_stat": 0.6696
+      },
+      {
+        "feature": "cart_checkout_delta",
+        "ks_stat": 0.6575
+      },
+      {
+        "feature": "hidden_line_items",
+        "ks_stat": 0.4545
+      },
+      {
+        "feature": "merchant_dispute_rate",
+        "ks_stat": 0.4545
+      },
+      {
+        "feature": "merchant_agent_reputation_score",
+        "ks_stat": 0.2905
+      },
+      {
+        "feature": "n_line_items",
+        "ks_stat": 0.2415
+      },
+      {
+        "feature": "checkout_amount",
+        "ks_stat": 0.2396
+      },
+      {
+        "feature": "token_age_seconds",
+        "ks_stat": 0.2232
+      },
+      {
+        "feature": "price_vs_market_ratio",
+        "ks_stat": 0.1818
+      },
+      {
+        "feature": "agent_negotiation_rounds",
+        "ks_stat": 0.1818
+      },
+      {
+        "feature": "hidden_rebate_amount",
+        "ks_stat": 0.1818
+      },
+      {
+        "feature": "rebate_to_non_customer_wallet",
+        "ks_stat": 0.1818
+      },
+      {
+        "feature": "settlement_account_mismatch",
+        "ks_stat": 0.1818
+      },
+      {
+        "feature": "token_reuse_count",
+        "ks_stat": 0.1818
+      },
+      {
+        "feature": "session_ip_changed",
+        "ks_stat": 0.1818
+      },
+      {
+        "feature": "cart_amount",
+        "ks_stat": 0.1744
+      },
+      {
+        "feature": "merchant_agent_first_seen_hours",
+        "ks_stat": 0.1511
+      },
+      {
+        "feature": "merchant_identity_verified",
+        "ks_stat": 0.0307
+      }
+    ],
+    "dcr_ratio": 1.727,
+    "dcr_d_intra_mean": 0.89,
+    "dcr_d_cross_mean": 1.5375,
+    "tstr_prauc": 1.0,
+    "tstr_roc_auc": 1.0,
+    "n_fraud_train": 121,
+    "n_legit_train": 4594,
+    "n_fraud_test": 74
+  },
+  "chat-call": {
+    "n_features": 7,
+    "ks_mean": 0.4478,
+    "ks_pct_realistic_overlap": 71.4,
+    "ks_pct_near_perfect_separation": 14.3,
+    "ks_zero_overlap_features": [
+      "message_contains_injection_pattern"
+    ],
+    "ks_per_feature": [
+      {
+        "feature": "message_contains_injection_pattern",
+        "ks_stat": 1.0
+      },
+      {
+        "feature": "requested_action_is_sensitive",
+        "ks_stat": 0.865
+      },
+      {
+        "feature": "authentication_level",
+        "ks_stat": 0.3656
+      },
+      {
+        "feature": "turn_index",
+        "ks_stat": 0.3222
+      },
+      {
+        "feature": "time_since_session_start_sec",
+        "ks_stat": 0.3222
+      },
+      {
+        "feature": "session_turn_count",
+        "ks_stat": 0.2596
+      },
+      {
+        "feature": "chatbot_complied",
+        "ks_stat": 0.0
+      }
+    ],
+    "dcr_ratio": 18.223,
+    "dcr_d_intra_mean": 0.068,
+    "dcr_d_cross_mean": 1.2386,
+    "tstr_prauc": 1.0,
+    "tstr_roc_auc": 0.9999999999999999,
+    "n_fraud_train": 30,
+    "n_legit_train": 1185,
+    "n_fraud_test": 10
+  }
+}
